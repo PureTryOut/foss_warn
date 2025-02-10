@@ -12,7 +12,7 @@ import 'save_and_load_shared_preferences.dart';
 import 'package:http/http.dart';
 
 /// call the FPAS api and load for myPlaces the warnings
-Future<void> callAPI() async {
+Future<void> callAPI(List<Place> places) async {
   bool successfullyFetched = true;
   String error = "";
   List<WarnMessage> tempWarnMessageList = [];
@@ -22,7 +22,7 @@ Future<void> callAPI() async {
 
   await loadMyPlacesList();
 
-  for (Place place in myPlaceList) {
+  for (Place place in places) {
     await place.callAPI();
 
     // set flag for updated alerts

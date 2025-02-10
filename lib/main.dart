@@ -83,6 +83,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
   void initState() {
     super.initState();
 
+    var places = ref.read(myPlacesProvider);
+
     // init unified push
     UnifiedPush.initialize(
       onNewEndpoint: UnifiedPushHandler
@@ -91,11 +93,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
           UnifiedPushHandler.onRegistrationFailed, // takes (String instance)
       onUnregistered:
           UnifiedPushHandler.onUnregistered, // takes (String instance)
-      onMessage: UnifiedPushHandler
-          .onMessage, // takes (Uint8List message, String instance) in args
+      onMessage: (message, instance) => UnifiedPushHandler.onMessage(
+        message: message,
+        instance: instance,
+        myPlaces: places,
+      ), // takes (Uint8List message, String instance) in args
     );
 
-    loadMyPlacesList();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      ref.read(myPlacesProvider.notifier).places = await loadMyPlacesList();
+    });
+
     listenNotifications();
   }
 
@@ -113,6 +121,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   @override
   Widget build(BuildContext context) {
     var updater = ref.read(updaterProvider);
+    var places = ref.watch(myPlacesProvider);
 
     return Scaffold(
         // set to false to prevent the widget from jumping after closing the keyboard
@@ -134,9 +143,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
             ),
             IconButton(
               onPressed: () {
-                for (Place p in myPlaceList) {
+                for (Place p in places) {
                   p.markAllWarningsAsRead(ref);
                 }
+
                 final snackBar = SnackBar(
                   content: Text(
                     AppLocalizations.of(context)!

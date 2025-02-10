@@ -2,18 +2,28 @@ import 'package:flutter/foundation.dart';
 import 'package:foss_warn/class/class_fpas_place.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foss_warn/services/api_handler.dart';
+import 'package:foss_warn/services/list_handler.dart';
 import 'save_and_load_shared_preferences.dart';
-import 'list_handler.dart';
 
-final updaterProvider = Provider((ref) => Update());
+final updaterProvider = Provider(
+  (ref) => Update(
+    myPlacesService: ref.watch(myPlacesProvider.notifier),
+  ),
+);
 
 class Update with ChangeNotifier {
+  MyPlacesService myPlacesService;
+
+  Update({required this.myPlacesService});
+
   // delete preset
   Future<void> updateList(Place newPlace) async {
     debugPrint("add new place: ${newPlace.name}");
-    myPlaceList.add(newPlace);
-    saveMyPlacesList();
-    await callAPI();
+
+    myPlacesService.add(newPlace);
+    saveMyPlacesList(myPlacesService.places);
+
+    await callAPI(myPlacesService.places);
     debugPrint("we have to rebuild the view");
     notifyListeners();
   }
@@ -26,8 +36,9 @@ class Update with ChangeNotifier {
   /// remove the given place from the List,
   /// save the updated list and update the view
   void deletePlace(place) {
-    myPlaceList.remove(place);
-    saveMyPlacesList();
+    myPlacesService.remove(place);
+
+    saveMyPlacesList(myPlacesService.places);
     debugPrint("place removed");
     notifyListeners();
   }

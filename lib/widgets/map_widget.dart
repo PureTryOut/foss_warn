@@ -13,18 +13,19 @@ class MapWidget extends StatefulWidget {
   final List<Widget>? widgets;
   final MapController mapController;
   final CameraFit initialCameraFit;
-  const MapWidget(
-      {super.key,
-      this.polygonLayers,
-      this.markerLayers,
-      this.widgets,
-      required this.mapController,
-      required this.initialCameraFit});
+  const MapWidget({
+    super.key,
+    this.polygonLayers,
+    this.markerLayers,
+    this.widgets,
+    required this.mapController,
+    required this.initialCameraFit,
+  });
 
   /// create polygon layer for my places alerts
-  static List<PolygonLayer> createPolygonLayer() {
+  static List<PolygonLayer> createPolygonLayer(List<Place> places) {
     List<PolygonLayer> result = [];
-    for (Place p in myPlaceList) {
+    for (Place p in places) {
       for (WarnMessage wm in p.warnings) {
         result.add(
           PolygonLayer(

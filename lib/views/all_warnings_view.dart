@@ -40,6 +40,7 @@ class _AllWarningsViewState extends ConsumerState<AllWarningsView> {
   @override
   Widget build(BuildContext context) {
     ref.watch(updaterProvider); // Just to rebuild on updates
+    var places = ref.watch(myPlacesProvider);
 
     Future<void> reloadData() async {
       setState(() {
@@ -49,14 +50,15 @@ class _AllWarningsViewState extends ConsumerState<AllWarningsView> {
 
     void loadData() async {
       debugPrint("[allWarningsView] Load Data");
+      var places = ref.read(myPlacesProvider);
       if (userPreferences.showAllWarnings) {
         // call api for the map warnings
         await callMapAPI();
       } else {
         // call (new) api just for my places/ alert swiss
-        await callAPI();
+        await callAPI(places);
       }
-      checkForMyPlacesWarnings(true);
+      checkForMyPlacesWarnings(places: places, loadManually: true);
       sortWarnings(mapWarningsList);
       setState(() {
         debugPrint("loading finished");
@@ -86,7 +88,7 @@ class _AllWarningsViewState extends ConsumerState<AllWarningsView> {
     List<WarnMessage> loadOnlyWarningsForMyPlaces() {
       debugPrint("loadOnlyWarningsForMyPlaces");
       List<WarnMessage> warningsForMyPlaces = [];
-      for (Place p in myPlaceList) {
+      for (Place p in places) {
         warningsForMyPlaces.addAll(p.warnings);
       }
       return warningsForMyPlaces;
@@ -95,7 +97,7 @@ class _AllWarningsViewState extends ConsumerState<AllWarningsView> {
     return RefreshIndicator(
       color: Theme.of(context).colorScheme.secondary,
       onRefresh: reloadData,
-      child: myPlaceList.isNotEmpty // check if there is a place saved
+      child: places.isNotEmpty // check if there is a place saved
           ? userPreferences
                   .showAllWarnings // if warnings that are not in MyPlaces shown
               ? SingleChildScrollView(

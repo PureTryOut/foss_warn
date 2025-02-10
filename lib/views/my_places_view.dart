@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foss_warn/services/api_handler.dart';
 
 import '../widgets/my_place_widget.dart';
-import '../services/update_provider.dart';
 import '../services/list_handler.dart';
 import '../widgets/connection_error_widget.dart';
 import 'add_my_place_with_map_view.dart';
@@ -24,7 +23,7 @@ class _MyPlacesState extends ConsumerState<MyPlaces>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (myPlaceList.isEmpty) {
+    if (ref.read(myPlacesProvider).isEmpty) {
       _loading = true;
     }
   }
@@ -47,8 +46,7 @@ class _MyPlacesState extends ConsumerState<MyPlaces>
 
   /// load data and call the API function
   load() async {
-    //await loadMyPlacesList(); //@todo should not be nessesary
-    await callAPI();
+    await callAPI(ref.read(myPlacesProvider));
     setState(() {
       _loading = false;
     });
@@ -63,7 +61,7 @@ class _MyPlacesState extends ConsumerState<MyPlaces>
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(updaterProvider); // Just to rebuild on updates
+    var places = ref.watch(myPlacesProvider);
 
     if (_loading == true) {
       load();
@@ -88,15 +86,14 @@ class _MyPlacesState extends ConsumerState<MyPlaces>
         fit: StackFit.expand,
         children: [
           //check if myPlaceList is empty, if not show list else show text
-          myPlaceList.isNotEmpty
+          places.isNotEmpty
               ? SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
                   child: Padding(
                       padding: const EdgeInsets.only(bottom: 65),
                       child: Column(children: [
                         ConnectionError(),
-                        ...myPlaceList
-                            .map((place) => MyPlaceWidget(myPlace: place)),
+                        ...places.map((place) => MyPlaceWidget(myPlace: place)),
                       ])),
                 )
               : Column(

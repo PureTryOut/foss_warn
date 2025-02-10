@@ -39,6 +39,8 @@ class _DevSettingsState extends ConsumerState<DevSettings> {
 
   @override
   Widget build(BuildContext context) {
+    var places = ref.watch(myPlacesProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.dev_settings_headline),
@@ -54,10 +56,13 @@ class _DevSettingsState extends ConsumerState<DevSettings> {
                     .dev_settings_test_notification),
                 subtitle: Text(AppLocalizations.of(context)!
                     .dev_settings_test_notification_text),
-                onTap: () {
-                  checkForMyPlacesWarnings(true);
+                onTap: () async {
+                  await checkForMyPlacesWarnings(
+                    places: places,
+                    loadManually: true,
+                  );
                   bool thereIsNoWarning = true;
-                  for (Place myPlace in myPlaceList) {
+                  for (Place myPlace in places) {
                     //check if there are warning and if it they are important enough
                     thereIsNoWarning =
                         !(myPlace.checkIfThereIsAWarningToNotify());
@@ -73,6 +78,7 @@ class _DevSettingsState extends ConsumerState<DevSettings> {
 
                     // Find the ScaffoldMessenger in the widget tree
                     // and use it to show a SnackBar.
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   }
                 },
@@ -86,7 +92,7 @@ class _DevSettingsState extends ConsumerState<DevSettings> {
                 onTap: () {
                   debugPrint(
                       "reset read and notification status for all warnings");
-                  for (Place p in myPlaceList) {
+                  for (Place p in places) {
                     p.resetReadAndNotificationStatusForAllWarnings(ref);
                   }
                   final snackBar = SnackBar(
@@ -108,11 +114,14 @@ class _DevSettingsState extends ConsumerState<DevSettings> {
                     AppLocalizations.of(context)!.dev_settings_delete_warnings),
                 subtitle: Text(AppLocalizations.of(context)!
                     .dev_settings_delete_warnings_text),
-                onTap: () {
-                  for (Place p in myPlaceList) {
+                onTap: () async {
+                  for (Place p in places) {
                     p.warnings.clear();
                   }
-                  saveMyPlacesList();
+
+                  await saveMyPlacesList(places);
+
+                  if (!context.mounted) return;
                   final snackBar = SnackBar(
                     content: Text(
                       AppLocalizations.of(context)!.dev_settings_success,
