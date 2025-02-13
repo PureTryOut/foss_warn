@@ -94,121 +94,125 @@ class _AllWarningsViewState extends ConsumerState<AllWarningsView> {
       return warningsForMyPlaces;
     }
 
-    return RefreshIndicator(
-      color: Theme.of(context).colorScheme.secondary,
-      onRefresh: reloadData,
-      child: places.isNotEmpty // check if there is a place saved
-          ? userPreferences
-                  .showAllWarnings // if warnings that are not in MyPlaces shown
-              ? SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: Column(children: [
-                    ConnectionError(),
-                    mapWarningsList.isEmpty ? NoWarningsInList() : SizedBox(),
-                    ...mapWarningsList.map((warnMessage) => WarningWidget(
-                        warnMessage: warnMessage, isMyPlaceWarning: false)),
-                  ]))
-              // else load only the warnings for my place
-              : loadOnlyWarningsForMyPlaces() //
-                      .isNotEmpty // check if there are warnings for myPlaces
-                  ? SingleChildScrollView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      child: Column(mainAxisSize: MainAxisSize.max, children: [
-                        ConnectionError(),
-                        ...loadOnlyWarningsForMyPlaces()
-                            .map((warnMessage) => WarningWidget(
-                                  warnMessage: warnMessage,
-                                  isMyPlaceWarning: true,
-                                )),
-                      ]),
-                    )
-                  : Column(
-                      // else show a screen with
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                      AppLocalizations.of(context)!
-                                          .all_warnings_everything_ok,
-                                      style: TextStyle(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.bold)),
-                                  Icon(
-                                    Icons.check_circle_rounded,
-                                    size: 200,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                  ),
-                                  Text(AppLocalizations.of(context)!
-                                      .all_warnings_everything_ok_text),
-                                  SizedBox(height: 10),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _loading = true;
-                                      });
-                                    },
-                                    style: TextButton.styleFrom(
-                                        backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .secondary),
-                                    child: Text(
-                                      AppLocalizations.of(context)!
-                                          .all_warnings_reload,
-                                      style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSecondary),
+    return Scaffold(
+      body: RefreshIndicator(
+        color: Theme.of(context).colorScheme.secondary,
+        onRefresh: reloadData,
+        child: places.isNotEmpty // check if there is a place saved
+            ? userPreferences
+                    .showAllWarnings // if warnings that are not in MyPlaces shown
+                ? SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Column(children: [
+                      ConnectionError(),
+                      mapWarningsList.isEmpty ? NoWarningsInList() : SizedBox(),
+                      ...mapWarningsList.map((warnMessage) => WarningWidget(
+                          warnMessage: warnMessage, isMyPlaceWarning: false)),
+                    ]))
+                // else load only the warnings for my place
+                : loadOnlyWarningsForMyPlaces() //
+                        .isNotEmpty // check if there are warnings for myPlaces
+                    ? SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child:
+                            Column(mainAxisSize: MainAxisSize.max, children: [
+                          ConnectionError(),
+                          ...loadOnlyWarningsForMyPlaces()
+                              .map((warnMessage) => WarningWidget(
+                                    warnMessage: warnMessage,
+                                    isMyPlaceWarning: true,
+                                  )),
+                        ]),
+                      )
+                    : Column(
+                        // else show a screen with
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                        AppLocalizations.of(context)!
+                                            .all_warnings_everything_ok,
+                                        style: TextStyle(
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold)),
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      size: 200,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
                                     ),
-                                  )
-                                ],
+                                    Text(AppLocalizations.of(context)!
+                                        .all_warnings_everything_ok_text),
+                                    SizedBox(height: 10),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _loading = true;
+                                        });
+                                      },
+                                      style: TextButton.styleFrom(
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .secondary),
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .all_warnings_reload,
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSecondary),
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    )
-          : Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    ConnectionError(),
-                  ],
-                ),
-                Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                              AppLocalizations.of(context)!
-                                  .all_warnings_no_places_chosen,
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
-                          Text("\n"),
-                          Text(AppLocalizations.of(context)!
-                              .all_warnings_no_places_chosen_text),
                         ],
+                      )
+            : Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      ConnectionError(),
+                    ],
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                                AppLocalizations.of(context)!
+                                    .all_warnings_no_places_chosen,
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text("\n"),
+                            Text(AppLocalizations.of(context)!
+                                .all_warnings_no_places_chosen_text),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                )
-              ],
-            ),
+                  )
+                ],
+              ),
+      ),
     );
   }
 }
