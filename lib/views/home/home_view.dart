@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foss_warn/class/class_fpas_place.dart';
 import 'package:foss_warn/class/class_notification_service.dart';
-import 'package:foss_warn/class/class_unified_push_handler.dart';
 import 'package:foss_warn/main.dart';
 import 'package:foss_warn/services/list_handler.dart';
 import 'package:foss_warn/services/save_and_load_shared_preferences.dart';
+import 'package:foss_warn/services/unifiedpush.dart';
 import 'package:foss_warn/services/update_provider.dart';
 import 'package:foss_warn/views/about_view.dart';
 import 'package:foss_warn/views/all_warnings_view.dart';
@@ -14,7 +13,6 @@ import 'package:foss_warn/views/map_view.dart';
 import 'package:foss_warn/views/my_places_view.dart';
 import 'package:foss_warn/views/settings_view.dart';
 import 'package:foss_warn/widgets/dialogs/sort_by_dialog.dart';
-import 'package:unifiedpush/unifiedpush.dart';
 
 enum MainMenuItem {
   settings,
@@ -35,19 +33,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
   void initState() {
     super.initState();
 
-    var places = ref.read(myPlacesProvider);
-
-    // init unified push
-    UnifiedPush.initialize(
-      onNewEndpoint: UnifiedPushHandler.onNewEndpoint,
-      onRegistrationFailed: UnifiedPushHandler.onRegistrationFailed,
-      onUnregistered: UnifiedPushHandler.onUnregistered,
-      onMessage: (message, instance) => UnifiedPushHandler.onMessage(
-        message: message,
-        instance: instance,
-        myPlaces: places,
-      ),
-    );
+    // Initialize UnifiedPush
+    ref.read(unifiedPushInitializationProvider);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       ref.read(myPlacesProvider.notifier).places = await loadMyPlacesList();

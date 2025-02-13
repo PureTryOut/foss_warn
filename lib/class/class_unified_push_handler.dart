@@ -48,7 +48,7 @@ class UnifiedPushHandler {
   static Future<bool> onMessage({
     required Uint8List message,
     required String instance,
-    required List<Place> myPlaces,
+    required List<Place> Function() getPlaces,
   }) async {
     debugPrint("instance $instance");
     if (instance != userPreferences.unifiedPushInstance) {
@@ -60,7 +60,7 @@ class UnifiedPushHandler {
     if (payload.contains("[DEBUG]") || payload.contains("[HEARTBEAT]")) {
       // system message or debug
     } else {
-      checkForMyPlacesWarnings(places: myPlaces, loadManually: true);
+      checkForMyPlacesWarnings(places: getPlaces(), loadManually: true);
     }
     return true;
   }
