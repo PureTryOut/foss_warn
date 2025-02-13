@@ -13,7 +13,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../class/class_warn_message.dart';
 import '../class/class_area.dart';
-import '../services/save_and_load_shared_preferences.dart';
 import '../services/update_provider.dart';
 
 class WarningWidget extends ConsumerWidget {
@@ -252,7 +251,7 @@ class WarningWidget extends ConsumerWidget {
         }
         updater.updateReadStatusInList();
         // save places list to store new read state
-        await saveMyPlacesList(places);
+        await ref.read(myPlacesProvider.notifier).set(places);
       },
       icon: _warnMessage.read
           ? Icon(

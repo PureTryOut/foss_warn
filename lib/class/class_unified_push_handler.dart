@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:foss_warn/class/class_error_logger.dart';
 import 'package:foss_warn/class/class_fpas_place.dart';
+import 'package:foss_warn/services/list_handler.dart';
 
 import 'package:unifiedpush/constants.dart';
 import 'package:unifiedpush/unifiedpush.dart';
@@ -49,6 +50,7 @@ class UnifiedPushHandler {
     required Uint8List message,
     required String instance,
     required List<Place> Function() getPlaces,
+    required MyPlacesService myPlacesService,
   }) async {
     debugPrint("instance $instance");
     if (instance != userPreferences.unifiedPushInstance) {
@@ -60,7 +62,11 @@ class UnifiedPushHandler {
     if (payload.contains("[DEBUG]") || payload.contains("[HEARTBEAT]")) {
       // system message or debug
     } else {
-      checkForMyPlacesWarnings(places: getPlaces(), loadManually: true);
+      checkForMyPlacesWarnings(
+        places: getPlaces(),
+        loadManually: true,
+        myPlacesService: myPlacesService,
+      );
     }
     return;
   }

@@ -12,6 +12,7 @@ final unifiedPushInitializationProvider = FutureProvider((ref) async {
       message: message,
       instance: instance,
       getPlaces: () => ref.read(myPlacesProvider),
+      myPlacesService: ref.read(myPlacesProvider.notifier),
     ),
   );
 });

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:foss_warn/class/class_fpas_place.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foss_warn/services/save_and_load_shared_preferences.dart';
 
 import '../main.dart';
 import '../services/check_for_my_places_warnings.dart';
@@ -60,6 +59,7 @@ class _DevSettingsState extends ConsumerState<DevSettings> {
                   await checkForMyPlacesWarnings(
                     places: places,
                     loadManually: true,
+                    myPlacesService: ref.read(myPlacesProvider.notifier),
                   );
                   bool thereIsNoWarning = true;
                   for (Place myPlace in places) {
@@ -119,7 +119,7 @@ class _DevSettingsState extends ConsumerState<DevSettings> {
                     p.warnings.clear();
                   }
 
-                  await saveMyPlacesList(places);
+                  await ref.read(myPlacesProvider.notifier).set(places);
 
                   if (!context.mounted) return;
                   final snackBar = SnackBar(

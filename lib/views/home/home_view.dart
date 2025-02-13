@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foss_warn/class/class_notification_service.dart';
 import 'package:foss_warn/main.dart';
 import 'package:foss_warn/services/list_handler.dart';
-import 'package:foss_warn/services/save_and_load_shared_preferences.dart';
 import 'package:foss_warn/services/unifiedpush.dart';
 import 'package:foss_warn/services/update_provider.dart';
 import 'package:foss_warn/views/about_view.dart';

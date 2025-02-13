@@ -35,7 +35,7 @@ class _DeletePlaceDialogState extends ConsumerState<DeletePlaceDialog> {
           style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError),
-          onPressed: () {
+          onPressed: () async {
             //remove place from list and update view
             debugPrint("place deleted");
 
@@ -44,7 +44,9 @@ class _DeletePlaceDialogState extends ConsumerState<DeletePlaceDialog> {
                 "unregister from server for place ${widget.myPlace.name}");
             widget.myPlace.unregisterForArea();
 
-            updater.deletePlace(widget.myPlace);
+            await updater.deletePlace(widget.myPlace);
+
+            if (!context.mounted) return;
             Navigator.of(context).pop();
           },
           child: Text(

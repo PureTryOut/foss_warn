@@ -57,7 +57,11 @@ class _AllWarningsViewState extends ConsumerState<AllWarningsView> {
         // call (new) api just for my places/ alert swiss
         await callAPI(places);
       }
-      checkForMyPlacesWarnings(places: places, loadManually: true);
+      checkForMyPlacesWarnings(
+        places: places,
+        loadManually: true,
+        myPlacesService: ref.read(myPlacesProvider.notifier),
+      );
       sortWarnings(mapWarningsList);
       setState(() {
         debugPrint("loading finished");
