@@ -7,7 +7,7 @@ import 'package:foss_warn/services/list_handler.dart';
 import 'package:foss_warn/services/unifiedpush.dart';
 import 'package:foss_warn/services/update_provider.dart';
 import 'package:foss_warn/views/about_view.dart';
-import 'package:foss_warn/views/all_warnings_view.dart';
+import 'package:foss_warn/views/warnings_view.dart';
 import 'package:foss_warn/views/map_view.dart';
 import 'package:foss_warn/views/my_places_view.dart';
 import 'package:foss_warn/views/settings_view.dart';
@@ -55,7 +55,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     var body = switch (selectedIndex) {
       1 => MyPlacesView(),
       2 => MapView(),
-      _ => AllWarningsView(),
+      _ => WarningsView(),
     };
 
     void onDestinationSelected(int index) {

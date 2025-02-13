@@ -5,7 +5,6 @@ import 'package:foss_warn/class/class_fpas_place.dart';
 import 'package:foss_warn/main.dart';
 
 import '../class/class_warn_message.dart';
-import 'list_handler.dart';
 import 'send_status_notification.dart';
 import 'save_and_load_shared_preferences.dart';
 
@@ -122,53 +121,6 @@ WarnMessage? createWarning(dynamic data, String provider, String geoJson) {
     appState.error = true; // display error message
   }
   return null;
-}
-
-Future<void> callMapAPI() async {
-  String baseUrl = "https://warnung.bund.de/api31";
-  dynamic data;
-  mapWarningsList.clear();
-
-  List<List<String>> mapApis = [
-    [
-      "Mowas",
-      "/mowas/mapData.json",
-    ],
-    ["Katwarn", "/katwarn/mapData.json"],
-    ["Dwd", "/dwd/mapData.json"],
-    ["Biwapp", "/biwapp/mapData.json"],
-    ["Lhp", "/lhp/mapData.json"],
-    ["police", "/police/mapData.json"],
-  ];
-
-  for (int i = 0; i < mapApis.length; i++) {
-    try {
-      Response response;
-      response = await getMapData(mapApis[i][1], baseUrl);
-
-      // 304 = with etag no change since last request
-      if (response.statusCode == 304) {
-        debugPrint("Nothing change for: ${mapApis[i][1]}");
-      }
-      // 200 = check if request was successfully
-      else if (response.statusCode == 200) {
-        // decode the _data
-        data = jsonDecode(utf8.decode(response.bodyBytes));
-        // parse the _data into List of Warnings
-        mapWarningsList
-            .addAll(await parseMapApiData(data, baseUrl, mapApis[i][0]));
-      }
-    } catch (e) {
-      debugPrint(
-          "[API Handler] Error while parsing map api data for ${mapApis[i][0]}. error: ${e.toString()}");
-      // write to logfile
-      appState.error = true;
-      ErrorLogger.writeErrorLog(
-          "apiHandler.dart",
-          "Error while parsing map api data for ${mapApis[i][0]}",
-          e.toString());
-    }
-  }
 }
 
 /// parse the map data, load the warning details and return a list of warnings

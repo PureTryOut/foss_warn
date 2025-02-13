@@ -168,16 +168,6 @@ class UserPreferences {
     _preferences.setInt("sortWarningBy", newValue.index);
   }
 
-  final bool _showAllWarnings = false;
-  bool get showAllWarnings {
-    bool? data = _preferences.getBool("showAllWarnings");
-    return data ?? _showAllWarnings;
-  }
-
-  set showAllWarnings(bool newValue) {
-    _preferences.setBool("showAllWarnings", newValue);
-  }
-
   final String _versionNumber = "0.8.0"; // shown in the about view
   String get versionNumber {
     return _versionNumber;

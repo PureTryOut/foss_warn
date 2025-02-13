@@ -71,7 +71,6 @@ Future<void> saveSettings() async {
       "selectedDarkTheme",
       userPreferences.availableDarkThemes
           .indexOf(userPreferences.selectedDarkTheme));
-  preferences.setBool("showAllWarnings", userPreferences.showAllWarnings);
   preferences.setString("notificationSourceSettings",
       jsonEncode(userPreferences.notificationSourceSetting));
   preferences.setString(
@@ -168,9 +167,6 @@ Future<void> loadSettings() async {
     }
   }
 
-  if (preferences.containsKey("showAllWarnings")) {
-    userPreferences.showAllWarnings = preferences.getBool("showAllWarnings")!;
-  }
   if (preferences.containsKey("notificationSourceSettings")) {
     List<dynamic> data =
         jsonDecode(preferences.getString("notificationSourceSettings")!);
