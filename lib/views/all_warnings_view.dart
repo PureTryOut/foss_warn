@@ -50,7 +50,6 @@ class _AllWarningsViewState extends ConsumerState<AllWarningsView> {
 
     void loadData() async {
       debugPrint("[allWarningsView] Load Data");
-      var places = ref.read(myPlacesProvider);
       if (userPreferences.showAllWarnings) {
         // call api for the map warnings
         await callMapAPI();

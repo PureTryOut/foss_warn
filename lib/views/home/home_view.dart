@@ -36,10 +36,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
     // Initialize UnifiedPush
     ref.read(unifiedPushInitializationProvider);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      ref.read(myPlacesProvider.notifier).places = await loadMyPlacesList();
-    });
-
     NotificationService.onNotification.stream.listen(onClickedNotification);
   }
 
@@ -121,7 +117,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
             onPressed: onOpenSortDialog,
           ),
           IconButton(
-            onPressed: onMarkNotificationAsRead,
+            onPressed: places.isNotEmpty ? onMarkNotificationAsRead : null,
             icon: Icon(Icons.mark_chat_read),
             tooltip:
                 localizations.main_app_bar_tooltip_mark_all_warnings_as_read,
