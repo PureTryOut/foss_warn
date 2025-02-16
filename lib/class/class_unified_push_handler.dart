@@ -35,13 +35,6 @@ class UnifiedPushHandler {
     userPreferences.unifiedPushRegistered = false;
     // send unregister to server
     // @todo send unregister for each subscription
-    /*http.post(
-      Uri.parse(userPreferences.fossPublicAlertServerUrl +
-          "/subscription/unsubscribe"),
-      body: jsonEncode(<String, String>{
-        'subscription_id': ,
-      }),
-    );*/
   }
 
   /// callback function to handle notification from unifiedPush

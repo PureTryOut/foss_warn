@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -8,13 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foss_warn/class/class_bounding_box.dart';
 import 'package:foss_warn/class/class_error_logger.dart';
 import 'package:foss_warn/class/class_fpas_place.dart';
-import 'package:foss_warn/class/class_user_agent_http_client.dart';
-import 'package:foss_warn/constants.dart' as constants;
 import 'package:foss_warn/main.dart';
 import 'package:foss_warn/services/alert_api/fpas.dart';
+import 'package:foss_warn/services/nominatim.dart';
 import 'package:foss_warn/widgets/map_widget.dart';
-import 'package:http/http.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 import '../class/class_notification_service.dart';
@@ -150,22 +146,6 @@ class _AddMyPlaceWithMapViewState extends ConsumerState<AddMyPlaceWithMapView> {
         points: points);
   }
 
-  Future<List<dynamic>> requestNovatimData(String requestString) async {
-    Uri requestURL = Uri.parse(
-        "https://nominatim.openstreetmap.org/search?q=$requestString&format=json&featureType=city");
-
-    UserAgentHttpClient client =
-        UserAgentHttpClient(constants.httpUserAgent, http.Client());
-
-    Response response = await client.get(
-      requestURL,
-      headers: {"Content-Type": "application/json"},
-    );
-    List<dynamic> searchData = jsonDecode(utf8.decode(response.bodyBytes));
-    debugPrint(searchData.toString());
-    return searchData;
-  }
-
   @override
   void dispose() {
     textInputFocus.dispose();
@@ -179,6 +159,7 @@ class _AddMyPlaceWithMapViewState extends ConsumerState<AddMyPlaceWithMapView> {
   Widget build(BuildContext context) {
     var updater = ref.read(updaterProvider);
     var alertApi = ref.read(alertApiProvider);
+    var nominatimApi = ref.read(nominatimApiProvider);
 
     return Scaffold(
       // set to false to prevent jumping of the radiusSlider Widget
@@ -264,8 +245,8 @@ class _AddMyPlaceWithMapViewState extends ConsumerState<AddMyPlaceWithMapView> {
                               .add_my_place_with_map_loading_screen_searching);
                       try {
                         // request data from nominatim
-                        searchResult = await requestNovatimData(
-                            textEditingController.text);
+                        searchResult = await nominatimApi
+                            .searchCity(textEditingController.text);
 
                         // show error if there is no result
                         if (searchResult.isEmpty) {

@@ -65,7 +65,7 @@ class _MapWidgetState extends State<MapWidget> {
               flags: InteractiveFlag.all & ~InteractiveFlag.rotate)),
       children: [
         TileLayer(
-          urlTemplate: userPreferences.osmTileServerULR,
+          urlTemplate: constants.tileServerUrl,
           userAgentPackageName: constants.httpUserAgent,
           tileBuilder:
               (BuildContext context, Widget tileWidget, TileImage tile) {

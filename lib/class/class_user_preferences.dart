@@ -381,6 +381,4 @@ class UserPreferences {
   }
 
   final String unifiedPushInstance = "FOSSWarn";
-  final String osmTileServerULR =
-      "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 }
