@@ -8,7 +8,7 @@ import 'package:foss_warn/class/class_bounding_box.dart';
 import 'package:foss_warn/class/class_error_logger.dart';
 import 'package:foss_warn/class/class_fpas_place.dart';
 import 'package:foss_warn/main.dart';
-import 'package:foss_warn/services/alert_api/fpas.dart';
+import 'package:foss_warn/services/alert_api/alert_api.dart';
 import 'package:foss_warn/services/nominatim.dart';
 import 'package:foss_warn/widgets/map_widget.dart';
 import 'package:latlong2/latlong.dart';

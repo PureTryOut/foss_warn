@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:foss_warn/class/class_fpas_place.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:foss_warn/services/alert_api/fpas.dart';
+import 'package:foss_warn/services/alert_api/alert_api.dart';
 import 'package:foss_warn/services/save_and_load_shared_preferences.dart';
 
 import '../main.dart';

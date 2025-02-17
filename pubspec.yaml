@@ -33,6 +33,7 @@ dependencies:
   path_provider: any
   vector_tile_renderer: any
   flutter_riverpod: ^2.6.1
+  flutter_dotenv: ^5.2.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -52,6 +53,7 @@ flutter:
   generate: true # for localizations
   uses-material-design: true
   assets:
+   - .env
    # welcome screen
    - assets/app_icon/app_icon.png
    - assets/location.png

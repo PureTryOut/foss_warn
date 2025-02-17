@@ -215,6 +215,10 @@ class _DetailScreenState extends State<DetailScreen> {
       }
     }
 
+    var polygons = Area.createListOfPolygonsForAreas(
+      widget._warnMessage.info.first.area,
+    );
+
     try {
       return SizedBox(
           height: 200,
@@ -223,9 +227,7 @@ class _DetailScreenState extends State<DetailScreen> {
             initialCameraFit: createInitCameraFit(),
             polygonLayers: [
               //@todo can be null
-              PolygonLayer(
-                  polygons: Area.createListOfPolygonsForAreas(
-                      widget._warnMessage.info.first.area)),
+              PolygonLayer(polygons: polygons),
             ],
             widgets: [
               Align(
