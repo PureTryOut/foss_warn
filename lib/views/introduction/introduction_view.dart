@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:foss_warn/class/class_unified_push_handler.dart';
 import 'package:foss_warn/main.dart';
 import 'package:foss_warn/class/class_notification_service.dart';
+import 'package:foss_warn/services/alert_api/fpas.dart';
 import 'package:foss_warn/services/api_handler.dart';
 import 'package:foss_warn/views/introduction/slides/alarm_permission.dart';
 import 'package:foss_warn/views/introduction/slides/battery_optimization.dart';
@@ -9,22 +12,26 @@ import 'package:foss_warn/views/introduction/slides/finish.dart';
 import 'package:foss_warn/views/introduction/slides/fpas_server_select.dart';
 import 'package:foss_warn/views/introduction/slides/notification_permission.dart';
 import 'package:foss_warn/views/introduction/slides/places.dart';
+import 'package:foss_warn/views/introduction/slides/unifiedpush.dart';
 import 'package:foss_warn/views/introduction/slides/warning_levels.dart';
 import 'package:foss_warn/views/introduction/slides/welcome.dart';
+import 'package:foss_warn/widgets/dialogs/no_up_distributor_found_dialog.dart';
+import 'package:unifiedpush/unifiedpush.dart';
 
-class IntroductionView extends StatefulWidget {
+class IntroductionView extends ConsumerStatefulWidget {
   const IntroductionView({super.key});
 
   @override
-  State<IntroductionView> createState() => _IntroductionViewState();
+  ConsumerState<IntroductionView> createState() => _IntroductionViewState();
 }
 
-class _IntroductionViewState extends State<IntroductionView>
+class _IntroductionViewState extends ConsumerState<IntroductionView>
     with WidgetsBindingObserver {
   int currentPage = 0;
   final PageController pageController = PageController();
 
   ServerSettings? selectedServerSettings;
+  String? selectedUnifiedPushDistributor;
   bool hasNotificationPermission = false;
   bool hasAlarmPermission = false;
 
@@ -59,6 +66,7 @@ class _IntroductionViewState extends State<IntroductionView>
   @override
   Widget build(BuildContext context) {
     var mediaQuery = MediaQuery.of(context);
+    var unifiedPushDistributors = ref.watch(unifiedPushDistributorsProvider);
 
     // TODO(PureTryOut): replace this for a fullproof solution to retrieve the keyboardOpen status
     // This will work fine on Android for the most part, however insets being bigger than 0 doesn't necessarily mean it's the keyboard.
@@ -80,17 +88,77 @@ class _IntroductionViewState extends State<IntroductionView>
 
     Future<void> onRequestNotificationPermissionPressed() async {
       hasNotificationPermission =
-          await NotificationService().requestNotificationPermission() ?? false;
-
+          await NotificationService.requestNotificationPermission() ?? false;
       setState(() {});
+
+      if (hasNotificationPermission) {
+        if (!context.mounted) return;
+        await NotificationService.init(context);
+
+        var unifiedPushHandler = ref.read(unifiedPushHandlerProvider);
+        UnifiedPush.initialize(
+          onNewEndpoint: (endpoint, instance) =>
+              unifiedPushHandler.onNewEndpoint(
+            ref: ref,
+            endpoint,
+            instance,
+          ),
+          onRegistrationFailed: unifiedPushHandler.onRegistrationFailed,
+          onUnregistered: (instance) => unifiedPushHandler.onUnregistered(
+            ref: ref,
+            instance,
+          ),
+          onMessage: (message, instance) => unifiedPushHandler.onMessage(
+            ref.read(alertApiProvider),
+            message,
+            instance,
+          ),
+        );
+
+        if (ref.read(unifiedPushDistributorsProvider).length == 1) {
+          if (!context.mounted) return;
+          try {
+            await ref.read(unifiedPushHandlerProvider).setup(context: context);
+          } on NoDistributorInstalled {
+            if (!context.mounted) return;
+            await showDialog(
+              context: context,
+              builder: (context) => const NoUPDistributorFoundDialog(),
+            );
+          }
+        }
+      }
+    }
+
+    Future<void> onUnifiedPushDistributorSelected(String distributor) async {
+      if (selectedUnifiedPushDistributor == distributor) {
+        selectedUnifiedPushDistributor = null;
+      } else {
+        selectedUnifiedPushDistributor = distributor;
+      }
+      setState(() {});
+
+      try {
+        await ref.read(unifiedPushHandlerProvider).setup(
+              context: context,
+              distributor: selectedUnifiedPushDistributor,
+            );
+      } on NoDistributorInstalled {
+        if (!context.mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) => const NoUPDistributorFoundDialog(),
+        );
+      }
     }
 
     Future<void> onRequestAlarmPermissionPressed() async {
       hasAlarmPermission =
           await NotificationService().requestExactAlarmPermission() ?? false;
-
       setState(() {});
-      await NotificationService().init();
+
+      if (!context.mounted) return;
+      await NotificationService.init(context);
     }
 
     Future<void> onFinishPressed() async {
@@ -117,6 +185,12 @@ class _IntroductionViewState extends State<IntroductionView>
         hasPermission: hasNotificationPermission,
         onPermissionChanged: onRequestNotificationPermissionPressed,
       ),
+      if (unifiedPushDistributors.length > 1) ...[
+        IntroductionUnifiedPushSlide(
+          onDistributorSelected: onUnifiedPushDistributorSelected,
+          selectedDistributor: selectedUnifiedPushDistributor,
+        ),
+      ],
       IntroductionAlarmPermissionSlide(
         hasPermission: hasAlarmPermission,
         onPermissionChanged: onRequestAlarmPermissionPressed,

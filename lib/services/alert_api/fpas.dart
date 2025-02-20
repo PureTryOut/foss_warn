@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foss_warn/class/class_bounding_box.dart';
+import 'package:foss_warn/class/class_unified_push_handler.dart';
 import 'package:foss_warn/class/class_warn_message.dart';
 import 'package:foss_warn/constants.dart' as constants;
 import 'package:foss_warn/main.dart';
@@ -10,14 +11,23 @@ import 'package:http/http.dart' as http;
 import 'package:xml2json/xml2json.dart';
 
 final alertApiProvider = Provider(
-  (ref) => FPASApi(serverUrl: userPreferences.fossPublicAlertServerUrl),
+  (ref) => FPASApi(
+    serverUrl: userPreferences.fossPublicAlertServerUrl,
+    unifiedPushEndpoint: ref.watch(unifiedPushEndpointProvider),
+  ),
 );
 
 class FPASApi implements AlertAPI {
   // TODO(PureTryOut): make use of this once userPreferences is a StateProvider which we can listen to updates for
   final String _baseUrl;
 
-  const FPASApi({required String serverUrl}) : _baseUrl = serverUrl;
+  final String? _unifiedPushEndpoint;
+
+  const FPASApi({
+    required String serverUrl,
+    required String? unifiedPushEndpoint,
+  })  : _baseUrl = serverUrl,
+        _unifiedPushEndpoint = unifiedPushEndpoint;
 
   @override
   Future<ServerSettings> fetchServerSettings({String? overrideUrl}) async {
@@ -107,10 +117,7 @@ class FPASApi implements AlertAPI {
   }
 
   @override
-  Future<String> registerArea({
-    required BoundingBox boundingBox,
-    required String unifiedPushEndpoint,
-  }) async {
+  Future<String> registerArea({required BoundingBox boundingBox}) async {
     var url =
         Uri.parse("${userPreferences.fossPublicAlertServerUrl}/subscription");
 
@@ -121,7 +128,7 @@ class FPASApi implements AlertAPI {
         'User-Agent': constants.httpUserAgent,
       },
       body: jsonEncode({
-        'token': unifiedPushEndpoint,
+        'token': _unifiedPushEndpoint,
         'push_service': "UNIFIED_PUSH",
         'min_lat': boundingBox.minLatLng.latitude.toString(),
         'max_lat': boundingBox.maxLatLng.latitude.toString(),

@@ -342,26 +342,6 @@ class UserPreferences {
     _preferences.setString("fossPublicAlertServerTermsOfService", value);
   }
 
-  final String _unifiedPushEndpoint = "";
-  String get unifiedPushEndpoint {
-    String? data = _preferences.getString("unifiedPushEndpoint");
-    return data ?? _unifiedPushEndpoint;
-  }
-
-  set unifiedPushEndpoint(String value) {
-    _preferences.setString("unifiedPushEndpoint", value);
-  }
-
-  final bool _unifiedPushRegistered = false;
-  bool get unifiedPushRegistered {
-    bool? data = _preferences.getBool("unifiedPushRegistered");
-    return data ?? _unifiedPushRegistered;
-  }
-
-  set unifiedPushRegistered(bool value) {
-    _preferences.setBool("unifiedPushRegistered", value);
-  }
-
   final List<String> _fossPublicAlertSubscriptionIdsToSubscribe = [];
   List<String> get fossPublicAlertSubscriptionIdsToSubscribe {
     List<String>? data =

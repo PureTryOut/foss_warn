@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:foss_warn/extensions/context.dart';
 import '../../services/url_launcher.dart';
 
-class NoUPDistributorFoundDialog extends StatefulWidget {
+class NoUPDistributorFoundDialog extends StatelessWidget {
   const NoUPDistributorFoundDialog({super.key});
 
-  @override
-  State<NoUPDistributorFoundDialog> createState() =>
-      _NoUPDistributorFoundDialogState();
-}
+  static Future<void> show(BuildContext context) async => showDialog<bool>(
+        context: context,
+        builder: (context) => const NoUPDistributorFoundDialog(),
+      );
 
-class _NoUPDistributorFoundDialogState
-    extends State<NoUPDistributorFoundDialog> {
   @override
   Widget build(BuildContext context) {
     var localizations = context.localizations;

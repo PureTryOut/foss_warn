@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:foss_warn/class/class_fpas_place.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:foss_warn/class/class_notification_service.dart';
 import 'package:foss_warn/class/class_unified_push_handler.dart';
 import 'package:foss_warn/class/class_user_preferences.dart';
-import 'package:foss_warn/services/alert_api/fpas.dart';
 import 'package:foss_warn/extensions/context.dart';
 import 'package:foss_warn/services/legacy_handler.dart';
 import 'package:foss_warn/services/list_handler.dart';
@@ -11,14 +11,12 @@ import 'package:foss_warn/views/about_view.dart';
 import 'package:foss_warn/views/map_view.dart';
 import 'package:foss_warn/views/introduction/introduction_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:unifiedpush/unifiedpush.dart';
+import 'package:foss_warn/widgets/dialogs/no_up_distributor_found_dialog.dart';
 
 import 'class/class_app_state.dart';
 import 'views/my_places_view.dart';
 import 'views/settings_view.dart';
 import 'views/all_warnings_view.dart';
-
-import 'class/class_notification_service.dart';
 
 import 'services/update_provider.dart';
 import 'services/save_and_load_shared_preferences.dart';
@@ -33,11 +31,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await legacyHandler();
   await userPreferences.init();
-  if (!userPreferences.showWelcomeScreen) {
-    // do not ask for notification permission before the user finished the
-    // welcome dialog
-    await NotificationService().init();
-  }
 
   runApp(const FOSSWarn());
 }
@@ -45,8 +38,17 @@ void main() async {
 class FOSSWarn extends StatelessWidget {
   const FOSSWarn({super.key});
 
+  void onClickedNotification(String? payload) {
+    // TODO(PureTryOut): determine what to do here
+    // We should probably navigate to some screen from here with go_router in the future
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Nothing is above this widget so it won't ever be rebuild and we can safely
+    // call this here
+    NotificationService.onNotification.stream.listen(onClickedNotification);
+
     return ProviderScope(
       child: MaterialApp(
         title: 'FOSS Warn',
@@ -86,33 +88,15 @@ class _HomeViewState extends ConsumerState<HomeView> {
   void initState() {
     super.initState();
 
-    // init unified push
-    UnifiedPush.initialize(
-      onNewEndpoint: UnifiedPushHandler
-          .onNewEndpoint, // takes (String endpoint, String instance) in args
-      onRegistrationFailed:
-          UnifiedPushHandler.onRegistrationFailed, // takes (String instance)
-      onUnregistered:
-          UnifiedPushHandler.onUnregistered, // takes (String instance)
-      onMessage: (message, instance) => UnifiedPushHandler.onMessage(
-        ref.read(alertApiProvider),
-        message,
-        instance,
-      ), // takes (Uint8List message, String instance) in args
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await ref.read(unifiedPushHandlerProvider).setup(context: context);
+      } on NoDistributorInstalled {
+        if (!mounted) return;
+        NoUPDistributorFoundDialog.show(context);
+      }
 
-    loadMyPlacesList();
-    listenNotifications();
-  }
-
-  void listenNotifications() {
-    NotificationService.onNotification.stream.listen(onClickedNotification);
-  }
-
-  void onClickedNotification(String? payload) {
-    //change view to "MyPlaces"
-    setState(() {
-      _selectedIndex = 1;
+      await loadMyPlacesList();
     });
   }
 

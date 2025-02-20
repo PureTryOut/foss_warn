@@ -548,12 +548,20 @@
   "@welcome_view_foss_public_alert_server_select_instance_helptext": {},
   "welcome_view_request_permission": "Request permission",
   "@welcome_view_request_permission": {},
+  "settings_foss_public_alert_server_settings_title": "FOSS Public Alert Server",
   "settings_foss_public_alert_server_enter_url_label_text": "Enter FPAS Server URL",
-  "@settings_foss_public_alert_server_enter_url_label_text": {},
   "settings_foss_public_alert_server_enter_url_error": "Invalid Server URL",
-  "@settings_foss_public_alert_server_enter_url_error": {},
+  "settings_foss_public_alert_server_server_operator": "Server Operator: {operator}",
+  "@settings_foss_public_alert_server_server_operator": {
+    "placeholders": {
+      "operator": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_foss_public_alert_server_terms_of_service": "Server Terms of Service",
+  "settings_foss_public_alert_server_privacy_notice": "Server Privacy",
   "welcome_view_foss_public_alert_server_server_operator": "This server is operated by:",
-  "@welcome_view_foss_public_alert_server_server_operator": {},
   "welcome_view_foss_public_alert_server_use_custom_server": "Use custom server",
   "@welcome_view_foss_public_alert_server_use_custom_server": {},
   "welcome_view_foss_public_alert_server_confirm_button": "Confirm",
@@ -561,5 +569,24 @@
   "welcome_view_foss_public_alert_server_confirm_success": "Confirmed",
   "@welcome_view_foss_public_alert_server_confirm_success": {},
   "welcome_view_foss_public_alert_server_use_default_server": "Use default server",
-  "@welcome_view_foss_public_alert_server_use_default_server": {}
+  "@welcome_view_foss_public_alert_server_use_default_server": {},
+  "@_NOTIFICATIONS": {},
+  "notification_channel_group_emergency_information_title": "Danger information",
+  "notification_channel_group_emergency_information_description": "Notifications of warnings",
+  "notification_channel_miscellaneous_title": "Miscellaneous",
+  "notification_channel_miscellaneous_description": "Other notifications",
+  "notification_channel_warning_level_low_title": "Warning level: low",
+  "notification_channel_warning_level_low_description": "Warning of interference to the normal daily routine",
+  "notification_channel_warning_level_moderate_title": "Warning level: moderate",
+  "notification_channel_warning_level_moderate_description": "A warning of a major disruption to the normal daily routine",
+  "notification_channel_warning_level_severe_title": "Warning level: severe",
+  "notification_channel_warning_level_severe_description": "A warning of a hazard that may affect your health, property and/or public infrastructure",
+  "notification_channel_warning_level_extreme_title": "Warning level: extreme",
+  "notification_channel_warning_level_extreme_description": "A warning of a hazard that may have a significant short-term impact on your health, property and/or public infrastructure",
+  "notification_channel_update_title": "Update",
+  "notification_channel_update_description": "Description",
+  "notification_channel_status_indicator_title": "Status indicator",
+  "notification_channel_status_indicator_description": "Time the current status of background updates",
+  "notification_channel_other_title": "Other",
+  "notification_channel_other_description": "Other notifications"
 }

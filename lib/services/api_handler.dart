@@ -169,10 +169,7 @@ abstract class AlertAPI {
   /// [boundingBox] is the area to register to receive alerts for.
   ///
   /// Returns a [String] containing the subscription ID
-  Future<String> registerArea({
-    required BoundingBox boundingBox,
-    required String unifiedPushEndpoint,
-  });
+  Future<String> registerArea({required BoundingBox boundingBox});
 
   /// Unregister from a given subscription.
   /// [subscriptionId] is the ID of the subscription to unregister for.

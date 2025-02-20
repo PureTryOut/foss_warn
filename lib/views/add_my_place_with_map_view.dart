@@ -18,7 +18,6 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 import '../class/class_notification_service.dart';
-import '../class/class_unified_push_handler.dart';
 import '../services/update_provider.dart';
 import '../widgets/dialogs/loading_screen.dart';
 
@@ -446,11 +445,6 @@ class _AddMyPlaceWithMapViewState extends ConsumerState<AddMyPlaceWithMapView> {
                           onPressed: () async {
                             if (_selectedPlaceName != "" &&
                                 selectedPlacePolygon != null) {
-                              // setup unifiedPush
-                              await UnifiedPushHandler.setupUnifiedPush(
-                                context,
-                              );
-
                               // subscribe for new area and create new place
                               // with the returned subscription id
                               if (!context.mounted) return;
@@ -462,8 +456,6 @@ class _AddMyPlaceWithMapViewState extends ConsumerState<AddMyPlaceWithMapView> {
                               try {
                                 subscriptionId = await alertApi.registerArea(
                                   boundingBox: boundingBox,
-                                  unifiedPushEndpoint:
-                                      userPreferences.unifiedPushEndpoint,
                                 );
                               } catch (e) {
                                 debugPrint("Error: ${e.toString()}");

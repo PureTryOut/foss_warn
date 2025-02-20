@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 
-selectUnifiedPushDistributorDialog(List<String> distributors) {
-  return (BuildContext context) {
+class SelectUnifiedPushDistributorDialog extends StatelessWidget {
+  const SelectUnifiedPushDistributorDialog({
+    required this.distributors,
+    super.key,
+  });
+
+  final List<String> distributors;
+
+  @override
+  Widget build(BuildContext context) {
+    var navigator = Navigator.of(context);
+
     return SimpleDialog(
       title: const Text('Select push distributor'),
       children: [
@@ -12,16 +22,14 @@ selectUnifiedPushDistributorDialog(List<String> distributors) {
           ),
         ),
         ...distributors.map<Widget>(
-          (d) => Padding(
+          (distributor) => Padding(
             padding: const EdgeInsets.all(8.0),
             child: Card(
               child: SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, d);
-                },
+                onPressed: () => navigator.pop(distributor),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Text(d),
+                  child: Text(distributor),
                 ),
               ),
             ),
@@ -29,5 +37,5 @@ selectUnifiedPushDistributorDialog(List<String> distributors) {
         ),
       ],
     );
-  };
+  }
 }

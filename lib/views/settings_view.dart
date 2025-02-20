@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:foss_warn/class/class_unified_push_handler.dart';
 import 'package:foss_warn/services/alert_api/fpas.dart';
 import 'package:foss_warn/extensions/context.dart';
 import 'package:foss_warn/views/dev_settings_view.dart';
+import 'package:http/http.dart';
 
 import '../main.dart';
 import '../services/url_launcher.dart';
@@ -24,17 +28,16 @@ class Settings extends ConsumerStatefulWidget {
 class _SettingsState extends ConsumerState<Settings> {
   final TextEditingController frequencyController = TextEditingController();
   final TextEditingController fpasServerURLController = TextEditingController();
-  bool _fpasServerURLError = false;
   final _platform = const MethodChannel("flutter.native/helper");
+
+  String? fpasUrlError;
 
   @override
   void initState() {
-    frequencyController.text =
-        userPreferences.frequencyOfAPICall.toInt().toString();
-    fpasServerURLController.text =
-        userPreferences.fossPublicAlertServerUrl.toString();
+    frequencyController.text = userPreferences.frequencyOfAPICall.toString();
+    fpasServerURLController.text = userPreferences.fossPublicAlertServerUrl;
 
-    return super.initState();
+    super.initState();
   }
 
   @override
@@ -50,6 +53,43 @@ class _SettingsState extends ConsumerState<Settings> {
     };
 
     var alertApi = ref.read(alertApiProvider);
+    var unifiedPushHandler = ref.read(unifiedPushHandlerProvider);
+
+    void onUnifiedPushUrlChanged(String _) {
+      fpasUrlError = null;
+
+      setState(() {});
+    }
+
+    Future<void> onUnifiedPushUrlSubmitted(String newUrl) async {
+      try {
+        var serverSettings =
+            await alertApi.fetchServerSettings(overrideUrl: newUrl);
+
+        if (!context.mounted) return;
+        unifiedPushHandler.setup(
+          context: context,
+          distributor: serverSettings.url,
+        );
+
+        userPreferences.fossPublicAlertServerUrl = serverSettings.url;
+        userPreferences.fossPublicAlertServerOperator = serverSettings.operator;
+        userPreferences.fossPublicAlertServerPrivacyNotice =
+            serverSettings.privacyNotice;
+        userPreferences.fossPublicAlertServerTermsOfService =
+            serverSettings.termsOfService;
+
+        fpasUrlError = null;
+      } on NoDistributorSelected {
+        // TODO(PureTryOut): be more specific with the errors to catch
+        fpasUrlError =
+            localizations.settings_foss_public_alert_server_enter_url_error;
+      } on ClientException {
+        print("WTF");
+      }
+
+      setState(() {});
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -94,85 +134,13 @@ class _SettingsState extends ConsumerState<Settings> {
               indent: 15.0,
               endIndent: 15.0,
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: indentOfCategoriesTitles),
-              child: Text(
-                "FOSS Public Alert Server", //@todo translate
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
+            _UnifiedPushSettings(
+              urlFieldController: fpasServerURLController,
+              urlError: fpasUrlError,
+              onUrlChanged: onUnifiedPushUrlChanged,
+              onUrlSubmitted: onUnifiedPushUrlSubmitted,
+              leftIndent: indentOfCategoriesTitles,
             ),
-            ListTile(
-              title: TextField(
-                controller: fpasServerURLController,
-                decoration: InputDecoration(
-                  // @todo translate settings_foss_public_alert_server_enter_url_label_text
-                  labelText: 'Enter FPAS Server URL',
-                  // settings_foss_public_alert_server_enter_url_error
-                  errorText: _fpasServerURLError ? "Invalid Server URL" : null,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _fpasServerURLError = false;
-                  });
-                },
-                onSubmitted: (newUrl) async {
-                  try {
-                    var serverSettings =
-                        await alertApi.fetchServerSettings(overrideUrl: newUrl);
-                    userPreferences.fossPublicAlertServerUrl =
-                        serverSettings.url;
-                    userPreferences.fossPublicAlertServerOperator =
-                        serverSettings.operator;
-                    userPreferences.fossPublicAlertServerPrivacyNotice =
-                        serverSettings.privacyNotice;
-                    userPreferences.fossPublicAlertServerTermsOfService =
-                        serverSettings.termsOfService;
-                    setState(() {
-                      _fpasServerURLError = false;
-                    });
-                  } catch (e) {
-                    debugPrint(e.toString());
-                    setState(() {
-                      _fpasServerURLError = true;
-                    });
-                  }
-                },
-              ),
-            ),
-            userPreferences.fossPublicAlertServerOperator != ""
-                ? ListTile(
-                    leading: const Icon(Icons.account_balance),
-                    title: Text(
-                      "Server Operator: ${userPreferences.fossPublicAlertServerOperator}",
-                    ),
-                  )
-                : const SizedBox(),
-            userPreferences.fossPublicAlertServerTermsOfService != ""
-                ? ListTile(
-                    leading: const Icon(Icons.open_in_new),
-                    title: const Text("Server Terms of Service"),
-                    onTap: () {
-                      launchUrlInBrowser(
-                        userPreferences.fossPublicAlertServerTermsOfService,
-                      );
-                    },
-                  )
-                : const SizedBox(),
-            userPreferences.fossPublicAlertServerPrivacyNotice != ""
-                ? ListTile(
-                    leading: const Icon(Icons.open_in_new),
-                    title: const Text("Server Privacy"),
-                    onTap: () {
-                      launchUrlInBrowser(
-                        userPreferences.fossPublicAlertServerPrivacyNotice,
-                      );
-                    },
-                  )
-                : const SizedBox(),
             const Divider(
               height: 50,
               indent: 15.0,
@@ -307,5 +275,96 @@ class _SettingsState extends ConsumerState<Settings> {
     } on PlatformException catch (e) {
       debugPrint(e.toString());
     }
+  }
+}
+
+class _UnifiedPushSettings extends StatelessWidget {
+  const _UnifiedPushSettings({
+    required this.urlFieldController,
+    required this.urlError,
+    required this.onUrlChanged,
+    required this.onUrlSubmitted,
+    this.leftIndent = 8.0,
+  });
+
+  final TextEditingController urlFieldController;
+  final String? urlError;
+  final void Function(String newUrl) onUrlChanged;
+  final void Function(String newUrl) onUrlSubmitted;
+
+  final double leftIndent;
+
+  @override
+  Widget build(BuildContext context) {
+    var localizations = context.localizations;
+    var theme = Theme.of(context);
+
+    void onTermsOfServicesPressed() {
+      launchUrlInBrowser(
+        userPreferences.fossPublicAlertServerTermsOfService,
+      );
+    }
+
+    void onPrivacyNotice() {
+      launchUrlInBrowser(
+        userPreferences.fossPublicAlertServerPrivacyNotice,
+      );
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: leftIndent),
+          child: Text(
+            localizations.settings_foss_public_alert_server_settings_title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        ListTile(
+          title: TextField(
+            controller: urlFieldController,
+            decoration: InputDecoration(
+              labelText: localizations
+                  .settings_foss_public_alert_server_enter_url_label_text,
+              errorText: urlError,
+            ),
+            onChanged: onUrlChanged,
+            onSubmitted: onUrlSubmitted,
+          ),
+        ),
+        if (userPreferences.fossPublicAlertServerOperator.isNotEmpty) ...[
+          ListTile(
+            leading: const Icon(Icons.account_balance),
+            title: Text(
+              localizations.settings_foss_public_alert_server_server_operator(
+                userPreferences.fossPublicAlertServerOperator,
+              ),
+            ),
+          ),
+        ],
+        if (userPreferences.fossPublicAlertServerTermsOfService.isNotEmpty) ...[
+          ListTile(
+            leading: const Icon(Icons.open_in_new),
+            title: Text(
+              localizations.settings_foss_public_alert_server_terms_of_service,
+            ),
+            onTap: onTermsOfServicesPressed,
+          ),
+        ],
+        if (userPreferences.fossPublicAlertServerPrivacyNotice.isNotEmpty) ...[
+          ListTile(
+            leading: const Icon(Icons.open_in_new),
+            title: Text(
+              localizations.settings_foss_public_alert_server_privacy_notice,
+            ),
+            onTap: onPrivacyNotice,
+          ),
+        ],
+      ],
+    );
   }
 }

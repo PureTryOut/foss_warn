@@ -15,7 +15,7 @@ saveMyPlacesList() async {
   preferences.setString("MyPlacesListAsJson", jsonEncode(myPlaceList));
 }
 
-loadMyPlacesList() async {
+Future<void> loadMyPlacesList() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
 
   if (preferences.containsKey("MyPlacesListAsJson")) {
@@ -113,14 +113,6 @@ Future<void> saveSettings() async {
   preferences.setString(
     "fossPublicAlertServerUrl",
     userPreferences.fossPublicAlertServerUrl,
-  );
-  preferences.setString(
-    "unifiedPushEndpoint",
-    userPreferences.unifiedPushEndpoint,
-  );
-  preferences.setBool(
-    "unifiedPushRegistered",
-    userPreferences.unifiedPushRegistered,
   );
   preferences.setStringList(
     "fossPublicAlertSubscriptionIdsToSubscribe",
@@ -237,14 +229,6 @@ Future<void> loadSettings() async {
   if (preferences.containsKey("fossPublicAlertServerUrl")) {
     userPreferences.fossPublicAlertServerUrl =
         preferences.getString("fossPublicAlertServerUrl")!;
-  }
-  if (preferences.containsKey("unifiedPushEndpoint")) {
-    userPreferences.unifiedPushEndpoint =
-        preferences.getString("unifiedPushEndpoint")!;
-  }
-  if (preferences.containsKey("unifiedPushRegistered")) {
-    userPreferences.unifiedPushRegistered =
-        preferences.getBool("unifiedPushRegistered")!;
   }
   if (preferences.containsKey("fossPublicAlertSubscriptionIdsToSubscribe")) {
     userPreferences.fossPublicAlertSubscriptionIdsToSubscribe =
